@@ -89,6 +89,31 @@ services::Status TreeLevelBuildHelperOneAPI<algorithmFPType>::initializeTreeOrde
 }
 
 template <typename algorithmFPType>
+services::Status TreeLevelBuildHelperOneAPI<algorithmFPType>::fillIntBuffer(UniversalBuffer & buf, size_t nElems, int32_t val)
+{
+    DAAL_ITTNOTIFY_SCOPED_TASK(compute.fillIntBuffer);
+
+    services::Status status;
+
+    auto & context = services::Environment::getInstance()->getDefaultExecutionContext();
+
+    auto & kernel = kernelFillIntBuffer;
+
+    {
+        KernelArguments args(2);
+        args.set(0, buf, AccessModeIds::write);
+        args.set(1, val);
+
+        KernelRange global_range(nElems);
+
+        context.run(global_range, kernel, args, &status);
+        DAAL_CHECK_STATUS_VAR(status);
+    }
+
+    return status;
+}
+
+template <typename algorithmFPType>
 services::Status TreeLevelBuildHelperOneAPI<algorithmFPType>::markPresentRows(const UniversalBuffer & rowsList, UniversalBuffer & rowsBuffer,
                                                                               size_t nRows, size_t localSize, size_t nSubgroupSums)
 {
@@ -239,9 +264,7 @@ services::Status TreeLevelBuildHelperOneAPI<algorithmFPType>::getOOBRows(const U
     auto totalSum          = context.allocate(TypeIds::id<int>(), 1, &status);
     DAAL_CHECK_STATUS_VAR(status);
 
-    context.fill(rowsBuffer, absentMark, &status);
-    DAAL_CHECK_STATUS_VAR(status);
-
+    DAAL_CHECK_STATUS_VAR(fillIntBuffer(rowsBuffer, nRows, absentMark));
     DAAL_CHECK_STATUS_VAR(markPresentRows(rowsList, rowsBuffer, nRows, localSize, nSubgroupSums));
     DAAL_CHECK_STATUS_VAR(countAbsentRowsForBlocks(rowsBuffer, nRows, partialSums, localSize, nSubgroupSums));
     DAAL_CHECK_STATUS_VAR(countAbsentRowsTotal(partialSums, partialPrefixSums, totalSum, localSize, nSubgroupSums));
@@ -534,6 +557,7 @@ services::Status TreeLevelBuildHelperOneAPI<algorithmFPType>::init(const char * 
     DAAL_CHECK_STATUS_VAR(buildProgram(kernel_factory, buildOptions));
 
     kernelInitializeTreeOrder = kernel_factory.getKernel("initializeTreeOrder", &status);
+    kernelFillIntBuffer       = kernel_factory.getKernel("fillIntBuffer", &status);
     kernelPartitionCopy       = kernel_factory.getKernel("partitionCopy", &status);
 
     kernelConvertSplitToLeaf          = kernel_factory.getKernel("convertSplitToLeaf", &status);

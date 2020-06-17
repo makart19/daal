@@ -56,6 +56,7 @@ public:
     services::Status init(const char * buildOptions);
 
     services::Status initializeTreeOrder(size_t nRows, oneapi::internal::UniversalBuffer & treeOrder);
+    services::Status fillIntBuffer(oneapi::internal::UniversalBuffer & buf, size_t nElems, int32_t val);
 
     services::Status convertSplitToLeaf(oneapi::internal::UniversalBuffer & nodeList, size_t nNodes);
 
@@ -95,6 +96,7 @@ private:
     services::Status buildProgram(oneapi::internal::ClKernelFactoryIface & factory, const char * buildOptions = nullptr);
 
     oneapi::internal::KernelPtr kernelInitializeTreeOrder;
+    oneapi::internal::KernelPtr kernelFillIntBuffer;
     oneapi::internal::KernelPtr kernelConvertSplitToLeaf;
     oneapi::internal::KernelPtr kernelGetNumOfSplitNodes;
     oneapi::internal::KernelPtr kernelDoNodesSplit;

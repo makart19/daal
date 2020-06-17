@@ -36,6 +36,11 @@ DECLARE_SOURCE(
         treeOrder[id] = id;
     }
 
+    __kernel void fillIntBuffer(__global int * buf, int val) {
+        const int id = get_global_id(0);
+        buf[id]      = val;
+    }
+
     __kernel void partitionCopy(const __global int * treeOrderBuf, __global int * treeOrder, int offset) {
         const int id           = get_global_id(0);
         treeOrder[offset + id] = treeOrderBuf[offset + id];
