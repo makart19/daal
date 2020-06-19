@@ -97,7 +97,7 @@ services::Status TrainBatchKernelOneAPI<algorithmFPType, method>::compute(const 
     auto argumentSNT = data_management::SyclHomogenNumericTable<algorithmFPType>::create(argumentBuff, 1, nBetaTotal, &status);
     DAAL_CHECK_STATUS_VAR(status);
 
-    DAAL_CHECK_STATUS(status, fillBuffer(argumentBuff, nBetaTotal, algorithmFPType(0.0)));
+    DAAL_CHECK_STATUS(status, fillBuffer(argumentBuff, nBetaTotal, (algorithmFPType)0));
 
     //initialization
     if (nClasses == 2)

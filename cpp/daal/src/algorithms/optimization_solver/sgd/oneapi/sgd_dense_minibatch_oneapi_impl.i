@@ -264,7 +264,7 @@ services::Status SGDKernelOneAPI<algorithmFPType, miniBatch>::compute(HostAppIfa
     }
     else
     {
-        DAAL_CHECK_STATUS(status, fillBuffer(prevWorkValueBuff, argumentSize, algorithmFPType(0.0)));
+        DAAL_CHECK_STATUS(status, fillBuffer(prevWorkValueBuff, argumentSize, (algorithmFPType)0));
     }
 
     // // init workValue

@@ -34,6 +34,7 @@
 #include "src/algorithms/dtrees/forest/regression/df_regression_model_impl.h"
 #include "src/algorithms/dtrees/forest/regression/oneapi/df_regression_tree_helper_impl.i"
 
+#include "src/sycl/fill_buffer_helper.h"
 #include "src/externals/service_ittnotify.h"
 #include "src/externals/service_rng.h"
 #include "src/externals/service_math.h" //will remove after migrating finalize MDA to GPU
@@ -651,8 +652,8 @@ services::Status RegressionTrainBatchKernelOneAPI<algorithmFPType, hist>::comput
     if (mdiRequired || mdaRequired)
     {
         DAAL_CHECK_STATUS_VAR(varImpResPtr->getBlockOfRows(0, 1, writeOnly, varImpBlock));
-        context.fill(varImpBlock.getBuffer(), (algorithmFPType)0, &status);
-        DAAL_CHECK_STATUS_VAR(status);
+        services::Buffer<algorithmFPType> varImpBlockBuf = varImpBlock.getBuffer();
+        DAAL_CHECK_STATUS_VAR(fillBuffer<algorithmFPType>(varImpBlockBuf, nFeatures, (algorithmFPType)0));
     }
 
     /* blocks for OutOfBag error calculation */
@@ -660,9 +661,9 @@ services::Status RegressionTrainBatchKernelOneAPI<algorithmFPType, hist>::comput
     if (oobRequired)
     {
         // oobBufferPerObs contains pair <cumulative value, count> for all out of bag observations for all trees
-        oobBufferPerObs = context.allocate(TypeIds::id<algorithmFPType>(), nRows * 2, &status);
-        context.fill(oobBufferPerObs, algorithmFPType(0), &status);
-        DAAL_CHECK_STATUS_VAR(status);
+        oobBufferPerObs                                      = context.allocate(TypeIds::id<algorithmFPType>(), nRows * 2, &status);
+        services::Buffer<algorithmFPType> oobBufferPerObsBuf = oobBufferPerObs.get<algorithmFPType>();
+        DAAL_CHECK_STATUS_VAR(fillBuffer(oobBufferPerObsBuf, nRows * 2, (algorithmFPType)0));
     }
 
     /* blocks for MDA scaled error calculation */

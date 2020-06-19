@@ -285,7 +285,7 @@ services::Status CrossEntropyLossKernelOneAPI<algorithmFPType, defaultDense>::do
         DAAL_CHECK_STATUS(status, HelperObjectiveFunction::lazyAllocate(_oneVector, n));
         services::Buffer<algorithmFPType> oneVectorBuf = _oneVector.get<algorithmFPType>();
 
-        DAAL_CHECK_STATUS(status, fillBuffer(oneVectorBuf, n, algorithmFPType(1.0)));
+        DAAL_CHECK_STATUS(status, fillBuffer(oneVectorBuf, n, (algorithmFPType)1));
         DAAL_CHECK_STATUS(status, betaIntercept(oneVectorBuf, argBuff, fBuf, n, nClasses, nBeta));
     }
 

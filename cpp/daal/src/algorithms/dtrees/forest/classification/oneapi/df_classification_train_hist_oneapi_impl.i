@@ -33,6 +33,7 @@
 #include "src/algorithms/dtrees/forest/classification/df_classification_model_impl.h"
 #include "src/algorithms/dtrees/forest/classification/oneapi/df_classification_tree_helper_impl.i"
 
+#include "src/sycl/fill_buffer_helper.h"
 #include "src/externals/service_ittnotify.h"
 #include "src/externals/service_rng.h"
 #include "src/externals/service_math.h" //will remove after migrating finalize MDA to GPU
@@ -689,8 +690,8 @@ services::Status ClassificationTrainBatchKernelOneAPI<algorithmFPType, hist>::co
     if (mdiRequired || mdaRequired)
     {
         DAAL_CHECK_STATUS_VAR(varImpResPtr->getBlockOfRows(0, 1, writeOnly, varImpBlock));
-        context.fill(varImpBlock.getBuffer(), (algorithmFPType)0, &status);
-        DAAL_CHECK_STATUS_VAR(status);
+        services::Buffer<algorithmFPType> varImpBlockBuf = varImpBlock.getBuffer();
+        DAAL_CHECK_STATUS_VAR(fillBuffer<algorithmFPType>(varImpBlockBuf, nFeatures, (algorithmFPType)0));
     }
 
     /* blocks for OutOfBag error calculation */
@@ -698,9 +699,9 @@ services::Status ClassificationTrainBatchKernelOneAPI<algorithmFPType, hist>::co
     if (oobRequired)
     {
         // oobBufferPerObs contains nClassed counters for all out of bag observations for all trees
-        oobBufferPerObs = context.allocate(TypeIds::id<uint32_t>(), nRows * _nClasses, &status);
-        context.fill(oobBufferPerObs, 0, &status);
-        DAAL_CHECK_STATUS_VAR(status);
+        oobBufferPerObs                               = context.allocate(TypeIds::id<uint32_t>(), nRows * _nClasses, &status);
+        services::Buffer<uint32_t> oobBufferPerObsBuf = oobBufferPerObs.get<uint32_t>();
+        DAAL_CHECK_STATUS_VAR(fillBuffer(oobBufferPerObsBuf, nRows * _nClasses, (uint32_t)0));
     }
 
     /* blocks for MDA scaled error calculation */

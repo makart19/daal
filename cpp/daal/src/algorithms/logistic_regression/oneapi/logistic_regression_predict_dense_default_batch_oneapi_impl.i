@@ -148,7 +148,7 @@ services::Status PredictBatchKernelOneAPI<algorithmFPType, method>::compute(serv
         DAAL_CHECK_STATUS(status, CrossEntropyLoss::applyBeta(xBuff, betaBuff, fBuf, n, nClasses, p, p + 1, offset));
         DAAL_CHECK_STATUS(status, HelperObjectiveFunction::lazyAllocate(_oneVector, n));
         services::Buffer<algorithmFPType> oneVectorBuf = _oneVector.get<algorithmFPType>();
-        DAAL_CHECK_STATUS(status, fillBuffer(oneVectorBuf, n, algorithmFPType(1.0)));
+        DAAL_CHECK_STATUS(status, fillBuffer(oneVectorBuf, n, (algorithmFPType)1));
 
         DAAL_CHECK_STATUS(status, CrossEntropyLoss::betaIntercept(oneVectorBuf, betaBuff, fBuf, n, nClasses, p + 1));
     }
