@@ -230,17 +230,18 @@ services::Status TreeLevelBuildHelperOneAPI<algorithmFPType>::getOOBRows(const U
 
     auto & context = services::Environment::getInstance()->getDefaultExecutionContext();
 
-    const int absentMark    = -1;
-    const int localSize     = _preferableSubGroup;
-    const int nSubgroupSums = _maxLocalSums * localSize < nRows ? _maxLocalSums : (nRows / localSize + !(nRows / localSize));
+    const int32_t absentMark   = -1;
+    const size_t localSize     = _preferableSubGroup;
+    const size_t nSubgroupSums = _maxLocalSums * localSize < nRows ? _maxLocalSums : (nRows / localSize + !(nRows / localSize));
 
-    auto rowsBuffer        = context.allocate(TypeIds::id<int>(), nRows, &status); // it is filled with marks Present/Absent for each rows
-    auto partialSums       = context.allocate(TypeIds::id<int>(), nSubgroupSums, &status);
-    auto partialPrefixSums = context.allocate(TypeIds::id<int>(), nSubgroupSums, &status);
-    auto totalSum          = context.allocate(TypeIds::id<int>(), 1, &status);
+    auto rowsBuffer        = context.allocate(TypeIds::id<int32_t>(), nRows, &status); // it is filled with marks Present/Absent for each rows
+    auto partialSums       = context.allocate(TypeIds::id<int32_t>(), nSubgroupSums, &status);
+    auto partialPrefixSums = context.allocate(TypeIds::id<int32_t>(), nSubgroupSums, &status);
+    auto totalSum          = context.allocate(TypeIds::id<int32_t>(), 1, &status);
     DAAL_CHECK_STATUS_VAR(status);
 
-    DAAL_CHECK_STATUS_VAR(fillBuffer(rowsBuffer.get<int>(), nRows, absentMark));
+    services::Buffer<int32_t> rowsBufferBuf = rowsBuffer.get<int32_t>();
+    DAAL_CHECK_STATUS_VAR(fillBuffer(rowsBufferBuf, nRows, absentMark));
     DAAL_CHECK_STATUS_VAR(markPresentRows(rowsList, rowsBuffer, nRows, localSize, nSubgroupSums));
     DAAL_CHECK_STATUS_VAR(countAbsentRowsForBlocks(rowsBuffer, nRows, partialSums, localSize, nSubgroupSums));
     DAAL_CHECK_STATUS_VAR(countAbsentRowsTotal(partialSums, partialPrefixSums, totalSum, localSize, nSubgroupSums));
