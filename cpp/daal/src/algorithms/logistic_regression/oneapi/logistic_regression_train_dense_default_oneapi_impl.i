@@ -28,6 +28,7 @@
 #include "algorithms/optimization_solver/objective_function/logistic_loss_batch.h"
 #include "algorithms/optimization_solver/objective_function/cross_entropy_loss_batch.h"
 #include "data_management/data/numeric_table_sycl_homogen.h"
+#include "src/sycl/fill_buffer_helper.h"
 
 #include "src/externals/service_ittnotify.h"
 DAAL_ITTNOTIFY_DOMAIN(logistic_regression.training.batch.oneapi);
@@ -96,7 +97,7 @@ services::Status TrainBatchKernelOneAPI<algorithmFPType, method>::compute(const 
     auto argumentSNT = data_management::SyclHomogenNumericTable<algorithmFPType>::create(argumentBuff, 1, nBetaTotal, &status);
     DAAL_CHECK_STATUS_VAR(status);
 
-    ctx.fill(argumentU, 0.0, &status);
+    DAAL_CHECK_STATUS(status, fillBuffer(argumentBuff, nBetaTotal, algorithmFPType(0.0)));
 
     //initialization
     if (nClasses == 2)

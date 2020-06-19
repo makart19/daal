@@ -23,6 +23,7 @@
 
 #include "src/sycl/math_service_types.h"
 #include "src/sycl/blas_gpu.h"
+#include "src/sycl/fill_buffer_helper.h"
 #include "src/algorithms/objective_function/cross_entropy_loss/oneapi/cl_kernel/cross_entropy_loss_dense_default.cl"
 #include "src/externals/service_ittnotify.h"
 
@@ -284,7 +285,7 @@ services::Status CrossEntropyLossKernelOneAPI<algorithmFPType, defaultDense>::do
         DAAL_CHECK_STATUS(status, HelperObjectiveFunction::lazyAllocate(_oneVector, n));
         services::Buffer<algorithmFPType> oneVectorBuf = _oneVector.get<algorithmFPType>();
 
-        ctx.fill(_oneVector, 1.0, &status);
+        DAAL_CHECK_STATUS(status, fillBuffer(oneVectorBuf, n, algorithmFPType(1.0)));
         DAAL_CHECK_STATUS(status, betaIntercept(oneVectorBuf, argBuff, fBuf, n, nClasses, nBeta));
     }
 

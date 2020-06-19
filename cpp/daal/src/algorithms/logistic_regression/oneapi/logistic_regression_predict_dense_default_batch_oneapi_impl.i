@@ -26,6 +26,7 @@
 
 #include "src/algorithms/logistic_regression/logistic_regression_model_impl.h"
 #include "src/algorithms/logistic_regression/oneapi/cl_kernel/logistic_regression_dense_default.cl"
+#include "src/sycl/fill_buffer_helper.h"
 
 namespace daal
 {
@@ -147,7 +148,7 @@ services::Status PredictBatchKernelOneAPI<algorithmFPType, method>::compute(serv
         DAAL_CHECK_STATUS(status, CrossEntropyLoss::applyBeta(xBuff, betaBuff, fBuf, n, nClasses, p, p + 1, offset));
         DAAL_CHECK_STATUS(status, HelperObjectiveFunction::lazyAllocate(_oneVector, n));
         services::Buffer<algorithmFPType> oneVectorBuf = _oneVector.get<algorithmFPType>();
-        ctx.fill(_oneVector, 1.0, &status);
+        DAAL_CHECK_STATUS(status, fillBuffer(oneVectorBuf, n, algorithmFPType(1.0)));
 
         DAAL_CHECK_STATUS(status, CrossEntropyLoss::betaIntercept(oneVectorBuf, betaBuff, fBuf, n, nClasses, p + 1));
     }

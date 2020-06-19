@@ -23,6 +23,7 @@
 #include "src/algorithms/dtrees/forest/oneapi/df_tree_level_build_helper_oneapi.h"
 #include "src/algorithms/dtrees/forest/oneapi/cl_kernels/df_tree_level_build_helper_kernels.cl"
 
+#include "src/sycl/fill_buffer_helper.h"
 #include "src/services/service_data_utils.h"
 #include "src/externals/service_ittnotify.h"
 
@@ -80,31 +81,6 @@ services::Status TreeLevelBuildHelperOneAPI<algorithmFPType>::initializeTreeOrde
         args.set(0, treeOrder, AccessModeIds::write);
 
         KernelRange global_range(nRows);
-
-        context.run(global_range, kernel, args, &status);
-        DAAL_CHECK_STATUS_VAR(status);
-    }
-
-    return status;
-}
-
-template <typename algorithmFPType>
-services::Status TreeLevelBuildHelperOneAPI<algorithmFPType>::fillIntBuffer(UniversalBuffer & buf, size_t nElems, int32_t val)
-{
-    DAAL_ITTNOTIFY_SCOPED_TASK(compute.fillIntBuffer);
-
-    services::Status status;
-
-    auto & context = services::Environment::getInstance()->getDefaultExecutionContext();
-
-    auto & kernel = kernelFillIntBuffer;
-
-    {
-        KernelArguments args(2);
-        args.set(0, buf, AccessModeIds::write);
-        args.set(1, val);
-
-        KernelRange global_range(nElems);
 
         context.run(global_range, kernel, args, &status);
         DAAL_CHECK_STATUS_VAR(status);
@@ -264,7 +240,7 @@ services::Status TreeLevelBuildHelperOneAPI<algorithmFPType>::getOOBRows(const U
     auto totalSum          = context.allocate(TypeIds::id<int>(), 1, &status);
     DAAL_CHECK_STATUS_VAR(status);
 
-    DAAL_CHECK_STATUS_VAR(fillIntBuffer(rowsBuffer, nRows, absentMark));
+    DAAL_CHECK_STATUS_VAR(fillBuffer(rowsBuffer.get<int>(), nRows, absentMark));
     DAAL_CHECK_STATUS_VAR(markPresentRows(rowsList, rowsBuffer, nRows, localSize, nSubgroupSums));
     DAAL_CHECK_STATUS_VAR(countAbsentRowsForBlocks(rowsBuffer, nRows, partialSums, localSize, nSubgroupSums));
     DAAL_CHECK_STATUS_VAR(countAbsentRowsTotal(partialSums, partialPrefixSums, totalSum, localSize, nSubgroupSums));

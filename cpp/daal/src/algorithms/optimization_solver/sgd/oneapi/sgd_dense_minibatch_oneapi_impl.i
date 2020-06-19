@@ -25,6 +25,7 @@
 #include "src/algorithms/optimization_solver/iterative_solver_kernel.h"
 #include "data_management/data/numeric_table_sycl_homogen.h"
 #include "src/externals/service_math.h"
+#include "src/sycl/fill_buffer_helper.h"
 
 #include "src/externals/service_ittnotify.h"
 
@@ -263,7 +264,7 @@ services::Status SGDKernelOneAPI<algorithmFPType, miniBatch>::compute(HostAppIfa
     }
     else
     {
-        ctx.fill(prevWorkValueU, 0.0, &status);
+        DAAL_CHECK_STATUS(status, fillBuffer(prevWorkValueBuff, argumentSize, algorithmFPType(0.0)));
     }
 
     // // init workValue
