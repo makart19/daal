@@ -534,7 +534,6 @@ services::Status TreeLevelBuildHelperOneAPI<algorithmFPType>::init(const char * 
     DAAL_CHECK_STATUS_VAR(buildProgram(kernel_factory, buildOptions));
 
     kernelInitializeTreeOrder = kernel_factory.getKernel("initializeTreeOrder", &status);
-    kernelFillIntBuffer       = kernel_factory.getKernel("fillIntBuffer", &status);
     kernelPartitionCopy       = kernel_factory.getKernel("partitionCopy", &status);
 
     kernelConvertSplitToLeaf          = kernel_factory.getKernel("convertSplitToLeaf", &status);

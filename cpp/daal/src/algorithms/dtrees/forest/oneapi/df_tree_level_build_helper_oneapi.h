@@ -95,7 +95,6 @@ private:
     services::Status buildProgram(oneapi::internal::ClKernelFactoryIface & factory, const char * buildOptions = nullptr);
 
     oneapi::internal::KernelPtr kernelInitializeTreeOrder;
-    oneapi::internal::KernelPtr kernelFillIntBuffer;
     oneapi::internal::KernelPtr kernelConvertSplitToLeaf;
     oneapi::internal::KernelPtr kernelGetNumOfSplitNodes;
     oneapi::internal::KernelPtr kernelDoNodesSplit;
